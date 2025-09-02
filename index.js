@@ -54,5 +54,9 @@ app.post("/upload", upload.single('product'),(req, res)=>{
 // Routes
 app.use("/api/auth", require("./src/routes/authRoutes"));
 app.use("/api", require("./src/routes/productRoutes"));
+app.use("/api", require("./src/routes/userRoutes"));
+app.use("/api", require("./src/routes/cartRoutes"));
+app.use("/api", require("./src/routes/orderRoutes"));
+
 
 module.exports = app;
