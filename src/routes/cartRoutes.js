@@ -1,20 +1,25 @@
+
 const express = require("express");
 const router = express.Router();
 const cartController = require("../controllers/cartController");
+const { authMiddleware, blockGuests } = require("../middleware/authMiddleware");
+const { validateCartAdd, validateCartUpdate } = require("../middleware/validateRequest");
 
-//Get Users cart
-router.get("/cart/:userId", cartController.getCart);
+// Ensure the path here matches how you mount in index.js (mounted at /api/cart)
 
-//Add item to the cart
-router.post("/cart/:userId/add", cartController.addToCart);
+// Get user's cart
+router.get("/:userId", authMiddleware, cartController.getCart);
 
-//Update the item quantity
-router.put("/cart/:userId/update/:itemId", cartController.updateCartItem);
+// Add item
+router.post("/:userId/add", authMiddleware, blockGuests, validateCartAdd, cartController.addToCart);
 
-//Remove item form the cart
-router.delete("/cart/:userId/remove/:itemId", cartController.removeFromCart);
+// Update item quantity by productId
+router.put("/:userId/update/:productId", authMiddleware, blockGuests, validateCartUpdate, cartController.updateCartItem);
 
-//Clear the entire cart
-router.delete("/cart/:userId/clear", cartController.clearCart);
+// Remove item by productId
+router.delete("/:userId/remove/:productId", authMiddleware, blockGuests, cartController.removeFromCart);
+
+// Clear entire cart
+router.delete("/:userId/clear", authMiddleware, blockGuests, cartController.clearCart);
 
 module.exports = router;

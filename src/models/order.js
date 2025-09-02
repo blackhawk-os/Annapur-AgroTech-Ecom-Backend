@@ -1,32 +1,23 @@
 const mongoose = require("mongoose");
 
 const orderItemSchema = new mongoose.Schema({
-  id: {type: String, required: true},
-
-  productId: {type: mongoose.Schema.Types.ObjectId,
-    ref: 'Product',
-    required: true
-  },
-  name: {type: String, required: true },
-  image: {type: String, required: true},
-  price: {type: Number, required: true},
-  category: {type: String, required: true},
-  quantity: {type: Number, required: true },
-  itemTotal: {type: Number, required: true}
+  productId: { type: mongoose.Schema.Types.ObjectId, ref: "Product", required: true },
+  name: { type: String, required: true },
+  image: { type: String, required: true },
+  price: { type: Number, required: true },
+  category: { type: String, required: true },
+  quantity: { type: Number, required: true },
+  itemTotal: { type: Number, required: true },
 });
 
 const orderSchema = new mongoose.Schema({
-  orderId: {type: String, unique: true, required: true },
-  subtotal: { type: Number, required: true},
-  userId: {type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    required: true
-  },
-  
+  orderId: { type: String, unique: true },
+  subtotal: { type: Number, required: true },
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
   items: [orderItemSchema],
-  shipping: {type: Number, required: true},
-  tax: {type: Number,required: true},
-  total: {type: Number,required: true},
+  shipping: { type: Number, required: true },
+  tax: { type: Number, required: true },
+  total: { type: Number, required: true },
   
   // Customer info (from checkout form)
   customer: {
@@ -72,9 +63,8 @@ orderSchema.pre('save', function(next) {
   this.updatedAt = Date.now();
   
   if (!this.orderId) {
-    this.orderId = 'ORD' + Date.now() + Math.random().toString(36).slice(2, 7).toUpperCase();
+    this.orderId = 'ORD' + Date.now() + Math.random().toString(36).substring(2, 7).toUpperCase();
   }
-  
   next();
 });
 

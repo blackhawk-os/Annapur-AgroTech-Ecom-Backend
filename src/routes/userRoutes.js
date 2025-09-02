@@ -1,13 +1,17 @@
+
 const express = require("express");
 const router = express.Router();
 const userController = require("../controllers/userController");
-// const auth = require("../middleware/auth"); // Add authentication middleware if needed
+const { authMiddleware, restrictTo } = require("../middleware/authMiddleware");
 
-// User routes
-router.get("/users", userController.getAllUsers);
-router.get("/users/:id", userController.getUserById);
-router.get("/profile", userController.getProfile); //for  current user
-router.put("/users/:id", userController.updateUser);
-router.delete("/users/:id", userController.deleteUser);
+// current profile
+router.get("/profile", authMiddleware, userController.getProfile);
+
+// admin
+//router.get("/", authMiddleware, restrictTo("admin"), userController.getAllUsers);
+router.get("/", authMiddleware, userController.getAllUsers);
+router.get("/:id", authMiddleware, userController.getUserById);
+router.put("/:id", authMiddleware, userController.updateUser);
+router.delete("/:id", authMiddleware, userController.deleteUser);
 
 module.exports = router;

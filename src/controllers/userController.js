@@ -1,111 +1,65 @@
-const User = require("../models/user");
 
-// Get all users
+const User = require("../models/User");
+
+// GET /api/users (admin)
 exports.getAllUsers = async (req, res) => {
-    try {
-        const users = await User.find({}).select('-password'); // Exclude passwords
-        res.json({
-            success: true,
-            users: users
-        });
-    } catch (error) {
-        res.status(500).json({
-            success: false,
-            error: error.message
-        });
-    }
+  try {
+    const users = await User.find({}).select("-password").sort({ createdAt: -1 });
+    res.json({ success: true, users });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
 };
 
-// Get user by their ID
+// GET /api/users/:id (self or admin)
 exports.getUserById = async (req, res) => {
-    try {
-        const user = await User.findById(req.params.id).select('-password');
-        
-        if (!user) {
-            return res.status(404).json({
-                success: false,
-                message: "User not found"
-            });
-        }
-        
-        res.json({
-            success: true,
-            user: user
-        });
-    } catch (error) {
-        res.status(500).json({
-            success: false,
-            error: error.message
-        });
-    }
+  try {
+    const user = await User.findById(req.params.id).select("-password");
+    if (!user) return res.status(404).json({ success: false, error: "User not found" });
+    res.json({ success: true, user });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
 };
 
-// Update user
+// PUT /api/users/:id (self or admin) - whitelist fields
 exports.updateUser = async (req, res) => {
-    try {
-        const user = await User.findByIdAndUpdate(
-            req.params.id,
-            { $set: req.body },
-            { new: true, runValidators: true }
-        ).select('-password');
-        
-        if (!user) {
-            return res.status(404).json({
-                success: false,
-                message: "User not found"
-            });
-        }
-        
-        res.json({
-            success: true,
-            message: "User updated successfully",
-            user: user
-        });
-    } catch (error) {
-        res.status(500).json({
-            success: false,
-            error: error.message
-        });
-    }
+  try {
+    const allowed = ["firstName", "lastName", "phone"];
+    const updates = {};
+    for (const k of allowed) if (k in req.body) updates[k] = req.body[k];
+
+    const user = await User.findByIdAndUpdate(
+      req.params.id,
+      { $set: updates },
+      { new: true, runValidators: true }
+    ).select("-password");
+
+    if (!user) return res.status(404).json({ success: false, error: "User not found" });
+    res.json({ success: true, message: "User updated", user });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
 };
 
-// Delete user
+// DELETE /api/users/:id (admin)
 exports.deleteUser = async (req, res) => {
-    try {
-        const user = await User.findByIdAndDelete(req.params.id);
-        
-        if (!user) {
-            return res.status(404).json({
-                success: false,
-                message: "User not found"
-            });
-        }
-        
-        res.json({
-            success: true,
-            message: "User deleted successfully"
-        });
-    } catch (error) {
-        res.status(500).json({
-            success: false,
-            error: error.message
-        });
-    }
+  try {
+    const user = await User.findByIdAndDelete(req.params.id);
+    if (!user) return res.status(404).json({ success: false, error: "User not found" });
+    res.json({ success: true, message: "User deleted" });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
 };
 
-// Get current user profile
+// GET /api/users/profile (current user)
 exports.getProfile = async (req, res) => {
-    try {
-        // Assuming you have authentication middleware that adds user to req
-        const user = await User.findById(req.user.id).select('-password');
-        res.json({
-            success: true,
-            user: user
-        });
-    } catch (error) {
-        res.status(500).json({
-            success: false,
-            error: error.message
-        });
-    }
+  try {
+    if (!req.user) return res.status(401).json({ success: false, error: "Unauthorized" });
+    const user = await User.findById(req.user._id).select("-password");
+    res.json({ success: true, user });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
 };
