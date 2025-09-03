@@ -35,7 +35,7 @@ const orderSchema = new mongoose.Schema({
   
   // Payment (from checkout form)
   paymentMethod: {type: String,
-    enum: ['cod', 'card', 'upi'],
+    enum: ['cod', 'card', 'upi', 'esewa'],
     required: true,
   },
   paymentStatus: {type: String,

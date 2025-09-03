@@ -7,8 +7,8 @@ const connectDB = async () => {
     process.exit(1);
   }
   try {
-    await mongoose.connect(uri, { autoIndex: true });
-    console.log(" MongoDB connected");
+    const conn = await mongoose.connect(uri, { autoIndex: true });
+    console.log(` MongoDB connected to: ${conn.connection.name}`);
   } catch (err) {
     console.error(" MongoDB connection error:", err.message);
     process.exit(1);

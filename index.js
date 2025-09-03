@@ -3,16 +3,19 @@ require('dotenv').config();
 const path = require("path");
 const fs = require("fs");
 const express = require("express");
+const bodyParser = require("body-parser");
 const cors = require("cors");
 const helmet = require('helmet');
 const multer = require("multer");
 
+// Middlewares
 const loggerMiddleware = require("./src/middleware/loggerMiddleware");
 const errorMiddleware = require("./src/middleware/errorMiddleware");
 
 const app = express();
 
-// Middlewares
+app.use(bodyParser.json());
+
 app.use(helmet()); // Security headers
 app.use(
     cors({
@@ -57,12 +60,17 @@ app.post("/upload", upload.single("product"),(req, res)=>{
     });
 });
 
+const paymentRoutes = require("./src/routes/paymentRoutes");
 // Routes
 app.use("/api/auth", require("./src/routes/authRoutes"));
 app.use("/api/products", require("./src/routes/productRoutes"));
 app.use("/api/users", require("./src/routes/userRoutes"));
 app.use("/api/cart", require("./src/routes/cartRoutes"));
 app.use("/api/orders", require("./src/routes/orderRoutes"));
+
+app.use("/api/payment", paymentRoutes);
+
+
 
 app.use(errorMiddleware);
 

@@ -1,6 +1,7 @@
 
 const { body, param, validationResult } = require("express-validator");
 
+const PAYMENT_METHODS = ["cod", "card", "upi", "esewa"];
 // when creating order, we validate customer, address, and payment (items come from cart)
 const validateCreateOrder = [
   param("userId").isMongoId().withMessage("Invalid user ID"),
@@ -10,7 +11,7 @@ const validateCreateOrder = [
   body("shippingAddress.address").isString().trim().notEmpty().withMessage("Address is required"),
   body("shippingAddress.city").isString().trim().notEmpty().withMessage("City is required"),
   body("shippingAddress.state").isString().trim().notEmpty().withMessage("State is required"),
-  body("paymentMethod").isIn(["cod", "card", "upi"]).withMessage("Invalid payment method"),
+  body("paymentMethod").isIn(PAYMENT_METHODS).withMessage("Invalid payment method"),
   (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty())

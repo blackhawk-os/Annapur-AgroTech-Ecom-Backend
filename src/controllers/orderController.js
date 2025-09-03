@@ -1,6 +1,6 @@
 
 const mongoose = require("mongoose");
-const Order = require("../models/Order");
+const Order = require("../models/order");
 const Cart = require("../models/Cart");
 
 // Helper order id (fallback if pre-save missing)
@@ -57,7 +57,12 @@ exports.createOrder = async (req, res) => {
         state: shippingAddress.state,
       },
       paymentMethod,
-      paymentStatus: paymentMethod === "cod" ? "pending" : "completed",
+      paymentStatus: 
+      paymentMethod === "cod" 
+      ? "pending" 
+      : paymentMethod === "esewa"
+      ? "pending"
+      : "completed",
       status: "pending",
     });
 
