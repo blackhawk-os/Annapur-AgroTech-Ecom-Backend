@@ -2,6 +2,36 @@
 const { body, param, validationResult } = require("express-validator");
 
 const PAYMENT_METHODS = ["cod", "card", "upi", "esewa"];
+
+const validateAddress = [
+  body("address").isString().trim().notEmpty().withMessage("Address is required"),
+  body("city").isString().trim().notEmpty().withMessage("City is required"),
+  body("state").isString().trim().notEmpty().withMessage("State is required"),
+  body("label").optional().isString().trim(),
+  body("isDefault").optional().isBoolean(),
+  (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty())
+      return res.status(400).json({ success: false, errors: errors.array() });
+    next();
+  },
+];
+
+// For updating an address (all fields optional but must be valid type if present)
+const validateUpdateAddress = [
+  body("address").optional().isString().trim(),
+  body("city").optional().isString().trim(),
+  body("state").optional().isString().trim(),
+  body("label").optional().isString().trim(),
+  body("isDefault").optional().isBoolean(),
+  (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty())
+      return res.status(400).json({ success: false, errors: errors.array() });
+    next();
+  },
+];
+
 // when creating order, we validate customer, address, and payment (items come from cart)
 const validateCreateOrder = [
   param("userId").isMongoId().withMessage("Invalid user ID"),
@@ -78,4 +108,6 @@ module.exports = {
   validateLogin,
   validateCartAdd,
   validateCartUpdate,
+  validateAddress,
+  validateUpdateAddress,
 };
