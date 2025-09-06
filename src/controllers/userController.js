@@ -27,7 +27,7 @@ exports.getUserById = async (req, res) => {
 // PUT /api/users/:id (self or admin) - whitelist fields
 exports.updateUser = async (req, res) => {
   try {
-    const allowed = ["firstName", "lastName", "phone"];
+    const allowed = ["firstName", "lastName", "phone", "email"];
     const updates = {};
     for (const k of allowed) if (k in req.body) updates[k] = req.body[k];
 
@@ -69,7 +69,6 @@ exports.getProfile = async (req, res) => {
   }
 };
 
-
 // ==========================
 // ADDRESS MANAGEMENT
 // ==========================
@@ -81,17 +80,25 @@ exports.addAddress = async (req, res) => {
     const { label, address, city, state, isDefault } = req.body;
 
     const user = await User.findById(id);
-    if (!user) return res.status(404).json({ success: false, error: "User not found" });
+    if (!user)
+      return res.status(404).json({ success: false, error: "User not found" });
 
-
-    if(!user.shippingAddresses){
-        user.shippingAddresses =[];
+    if (!user.shippingAddresses) {
+      user.shippingAddresses = [];
     }
     if (isDefault && user.shippingAddresses.length > 0) {
-      user.shippingAddresses = usershippingAddresses.map(addr => (addr.isDefault = false));
+      user.shippingAddresses = usershippingAddresses.map(
+        (addr) => (addr.isDefault = false)
+      );
     }
 
-    user.shippingAddresses.push({ label, address, city, state, isDefault: !!isDefault });
+    user.shippingAddresses.push({
+      label,
+      address,
+      city,
+      state,
+      isDefault: !!isDefault,
+    });
     await user.save();
 
     res.json({
@@ -109,9 +116,10 @@ exports.getAddresses = async (req, res) => {
   try {
     const { id } = req.params;
     const user = await User.findById(id).select("shippingAddresses");
-    if (!user) return res.status(404).json({ success: false, error: "User not found" });
+    if (!user)
+      return res.status(404).json({ success: false, error: "User not found" });
 
-    res.json({ success: true, addresses: user.shippingAddresses || [], });
+    res.json({ success: true, addresses: user.shippingAddresses || [] });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
@@ -122,9 +130,11 @@ exports.getDefaultAddress = async (req, res) => {
   try {
     const { id } = req.params;
     const user = await User.findById(id).select("shippingAddresses");
-    if (!user) return res.status(404).json({ success: false, error: "User not found" });
+    if (!user)
+      return res.status(404).json({ success: false, error: "User not found" });
 
-    const defaultAddress = user.shippingAddresses.find(addr => addr.isDefault) || null;
+    const defaultAddress =
+      user.shippingAddresses.find((addr) => addr.isDefault) || null;
 
     res.json({ success: true, defaultAddress });
   } catch (error) {
@@ -137,9 +147,10 @@ exports.setDefaultAddress = async (req, res) => {
   try {
     const { id, addressId } = req.params;
     const user = await User.findById(id);
-    if (!user) return res.status(404).json({ success: false, error: "User not found" });
+    if (!user)
+      return res.status(404).json({ success: false, error: "User not found" });
 
-    user.shippingAddresses.forEach(addr => {
+    user.shippingAddresses.forEach((addr) => {
       addr.isDefault = addr._id.toString() === addressId;
     });
 
@@ -161,13 +172,17 @@ exports.updateAddress = async (req, res) => {
     const { label, address, city, state, isDefault } = req.body;
 
     const user = await User.findById(id);
-    if (!user) return res.status(404).json({ success: false, error: "User not found" });
+    if (!user)
+      return res.status(404).json({ success: false, error: "User not found" });
 
     const addr = user.shippingAddresses.id(addressId);
-    if (!addr) return res.status(404).json({ success: false, error: "Address not found" });
+    if (!addr)
+      return res
+        .status(404)
+        .json({ success: false, error: "Address not found" });
 
     if (isDefault) {
-      user.shippingAddresses.forEach(a => (a.isDefault = false));
+      user.shippingAddresses.forEach((a) => (a.isDefault = false));
     }
 
     addr.label = label ?? addr.label;
@@ -192,9 +207,12 @@ exports.deleteAddress = async (req, res) => {
   try {
     const { id, addressId } = req.params;
     const user = await User.findById(id);
-    if (!user) return res.status(404).json({ success: false, error: "User not found" });
+    if (!user)
+      return res.status(404).json({ success: false, error: "User not found" });
 
-    user.shippingAddresses = user.shippingAddresses.filter(addr => addr._id.toString() !== addressId);
+    user.shippingAddresses = user.shippingAddresses.filter(
+      (addr) => addr._id.toString() !== addressId
+    );
 
     await user.save();
     res.json({
